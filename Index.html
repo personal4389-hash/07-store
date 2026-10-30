@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>07 STORE</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--pri:#0f766e;--pri-d:#115e59;--bg:#f6f8f8;--card:#fff;--txt:#1f2937;--mut:#6b7280;--bd:#e5e7eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Poppins,system-ui,sans-serif;background:var(--bg);color:var(--txt);padding-bottom:90px}
+header{background:linear-gradient(135deg,var(--pri),var(--pri-d));color:#fff;text-align:center;padding:28px 16px}
+header h1{font-size:1.8rem;letter-spacing:1px}
+header p{opacity:.9;font-size:.95rem;margin-top:4px}
+header small{display:block;opacity:.75;margin-top:6px}
+.cats{display:flex;gap:8px;overflow-x:auto;padding:14px 12px;position:sticky;top:0;background:var(--bg);z-index:5;scrollbar-width:none}
+.cats button{flex:none;border:1px solid var(--bd);background:#fff;padding:8px 16px;border-radius:20px;font:500 .85rem Poppins;cursor:pointer}
+.cats button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:0 12px;max-width:1100px;margin:auto}
+@media(min-width:700px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1000px){.grid{grid-template-columns:repeat(4,1fr)}}
+.card{background:var(--card);border-radius:14px;overflow:hidden;box-shadow:0 1px 4px #0001;display:flex;flex-direction:column}
+.card img{width:100%;aspect-ratio:1;object-fit:cover;background:#eee}
+.card .b{padding:10px;display:flex;flex-direction:column;gap:4px;flex:1}
+.card h3{font-size:.9rem;font-weight:600}
+.card p{font-size:.75rem;color:var(--mut);flex:1}
+.card .pr{font-weight:700;color:var(--pri)}
+.btn{background:var(--pri);color:#fff;border:0;border-radius:10px;padding:10px;font:600 .85rem Poppins;cursor:pointer;transition:transform .15s,background .2s}
+.btn:hover{background:var(--pri-d)}.btn:active{transform:scale(.95)}
+.fab{position:fixed;right:16px;width:56px;height:56px;border-radius:50%;border:0;color:#fff;font-size:1.5rem;cursor:pointer;box-shadow:0 4px 12px #0003;z-index:10;display:flex;align-items:center;justify-content:center;text-decoration:none}
+#cartBtn{bottom:16px;background:var(--pri)}
+#wa{bottom:84px;background:#25d366}
+#cnt{position:absolute;top:-4px;right:-4px;background:#ef4444;font:700 .7rem Poppins;min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.bump{animation:bump .3s}
+@keyframes bump{50%{transform:scale(1.25)}}
+.ov{position:fixed;inset:0;background:#0006;display:none;align-items:flex-end;justify-content:center;z-index:20}
+.ov.show{display:flex}
+.sheet{background:#fff;width:100%;max-width:520px;max-height:90vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px;animation:up .25s}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+.sheet h2{margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.x{background:none;border:0;font-size:1.6rem;cursor:pointer}
+.it{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--bd)}
+.it img{width:52px;height:52px;border-radius:8px;object-fit:cover}
+.it .i{flex:1;font-size:.85rem}.it .i b{display:block}
+.q{display:flex;align-items:center;gap:6px}
+.q button{width:28px;height:28px;border-radius:50%;border:1px solid var(--bd);background:#fff;font-size:1rem;cursor:pointer}
+.rm{color:#ef4444;background:none;border:0;font-size:.75rem;cursor:pointer}
+.tot{display:flex;justify-content:space-between;font-weight:700;font-size:1.1rem;padding:14px 0}
+form label{display:block;font-size:.8rem;font-weight:500;margin:10px 0 4px}
+form input,form textarea{width:100%;padding:10px;border:1px solid var(--bd);border-radius:10px;font:inherit}
+.btn.full{width:100%;margin-top:14px;padding:13px}
+.empty,.ok{text-align:center;color:var(--mut);padding:24px 0}
+.ok h3{color:var(--pri);margin-bottom:8px}
+.ok a{display:inline-block;margin-top:14px;background:#25d366;color:#fff;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:600}
+.err{color:#ef4444;font-size:.8rem;margin-top:8px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1 id="shopName"></h1>
+  <p id="tagline"></p>
+  <small id="loc"></small>
+</header>
+
+<div class="cats" id="cats"></div>
+<main class="grid" id="grid"></main>
+
+<a class="fab" id="wa" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">💬</a>
+<button class="fab" id="cartBtn" aria-label="Open cart">🛒<span id="cnt">0</span></button>
+
+<div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
+
+<script>
+/* ===== EDIT THESE ===== */
+const CFG = {
+  name: "07 STORE",
+  tagline: "Quality products, delivered to your door",   // change me
+  location: "Your City, State",                          // change me
+  whatsapp: "91XXXXXXXXXX",                              // country code + number, no + or spaces
+  email: "personal4389@gmail.com",                       // orders are received here
+  currency: "₹"
+};
+const IMG = "https://i.ibb.co/CKq4Tn1q/IMG-802f54e0-b9cf-4b30-bf75-f8eb8bf4c539.jpg";
+// Replace names, prices, categories and image links with your own products
+const PRODUCTS = [
+  {id:1,name:"Product 1",price:299,cat:"Featured",img:IMG,desc:"Short description of product 1"},
+  {id:2,name:"Product 2",price:499,cat:"Featured",img:IMG,desc:"Short description of product 2"},
+  {id:3,name:"Product 3",price:199,cat:"Essentials",img:IMG,desc:"Short description of product 3"},
+  {id:4,name:"Product 4",price:349,cat:"Essentials",img:IMG,desc:"Short description of product 4"},
+  {id:5,name:"Product 5",price:599,cat:"Premium",img:IMG,desc:"Short description of product 5"},
+  {id:6,name:"Product 6",price:799,cat:"Premium",img:IMG,desc:"Short description of product 6"},
+  {id:7,name:"Product 7",price:149,cat:"Offers",img:IMG,desc:"Short description of product 7"},
+  {id:8,name:"Product 8",price:249,cat:"Offers",img:IMG,desc:"Short description of product 8"}
+];
+/* ====================== */
+
+const $ = id => document.getElementById(id);
+const money = n => CFG.currency + n.toLocaleString("en-IN");
+const KEY = "07store_cart";
+let cart = [];
+try { cart = JSON.parse(localStorage.getItem(KEY)) || []; } catch(e){}
+let cat = "All";
+
+document.title = CFG.name;
+$("shopName").textContent = CFG.name;
+$("tagline").textContent = CFG.tagline;
+$("loc").textContent = "📍 " + CFG.location;
+$("wa").href = "https://wa.me/" + CFG.whatsapp;
+
+const save = () => { try{localStorage.setItem(KEY, JSON.stringify(cart));}catch(e){} updateCount(); };
+function updateCount(){
+  const n = cart.reduce((s,i)=>s+i.qty,0);
+  $("cnt").textContent = n;
+  $("cartBtn").classList.remove("bump"); void $("cartBtn").offsetWidth; $("cartBtn").classList.add("bump");
+}
+
+function renderCats(){
+  const cats = ["All", ...new Set(PRODUCTS.map(p=>p.cat))];
+  $("cats").innerHTML = cats.map(c=>`<button class="${c===cat?'on':''}" data-c="${c}">${c}</button>`).join("");
+  $("cats").querySelectorAll("button").forEach(b=>b.onclick=()=>{cat=b.dataset.c;renderCats();renderGrid();});
+}
+function renderGrid(){
+  $("grid").innerHTML = PRODUCTS.filter(p=>cat==="All"||p.cat===cat).map(p=>`
+    <div class="card">
+      <img src="${p.img}" alt="${p.name}" loading="lazy">
+      <div class="b"><h3>${p.name}</h3><p>${p.desc}</p><span class="pr">${money(p.price)}</span>
+      <button class="btn" data-id="${p.id}">Add to Cart</button></div>
+    </div>`).join("");
+  $("grid").querySelectorAll("button").forEach(b=>b.onclick=()=>{
+    const p = PRODUCTS.find(x=>x.id==b.dataset.id);
+    const it = cart.find(i=>i.id===p.id);
+    it ? it.qty++ : cart.push({id:p.id,name:p.name,price:p.price,img:p.img,qty:1});
+    save(); b.textContent="Added ✓"; setTimeout(()=>b.textContent="Add to Cart",700);
+  });
+}
+
+const open = html => { $("sheet").innerHTML = html; $("ov").classList.add("show"); };
+const close = () => $("ov").classList.remove("show");
+$("ov").onclick = e => { if(e.target.id==="ov") close(); };
+$("cartBtn").onclick = showCart;
+
+const total = () => cart.reduce((s,i)=>s+i.price*i.qty,0);
+
+function showCart(){
+  if(!cart.length){ open(`<h2>Your Cart <button class="x" onclick="close_()">×</button></h2><div class="empty">Your cart is empty 🛒</div>`); return; }
+  open(`<h2>Your Cart <button class="x" onclick="close_()">×</button></h2>
+    ${cart.map(i=>`<div class="it"><img src="${i.img}" alt="${i.name}" loading="lazy">
+      <div class="i"><b>${i.name}</b>${money(i.price)} × ${i.qty} = <b style="display:inline">${money(i.price*i.qty)}</b></div>
+      <div class="q"><button onclick="chg(${i.id},-1)">−</button><span>${i.qty}</span><button onclick="chg(${i.id},1)">+</button></div>
+      <button class="rm" onclick="del(${i.id})">Remove</button></div>`).join("")}
+    <div class="tot"><span>Grand Total</span><span>${money(total())}</span></div>
+    <button class="btn full" onclick="checkout()">Place Order</button>`);
+}
+function chg(id,d){ const i=cart.find(x=>x.id===id); i.qty+=d; if(i.qty<1) cart=cart.filter(x=>x.id!==id); save(); showCart(); }
+function del(id){ cart=cart.filter(x=>x.id!==id); save(); showCart(); }
+function close_(){ close(); }
+
+function checkout(){
+  open(`<h2>Delivery Details <button class="x" onclick="close_()">×</button></h2>
+    <form id="of">
+      <label>Name *</label><input name="Customer Name" required>
+      <label>Phone Number *</label><input name="Customer Phone" type="tel" required pattern="[0-9+ \\-]{8,15}">
+      <label>Delivery Address *</label><textarea name="Delivery Address" rows="3" required></textarea>
+      <label>Special Instructions (optional)</label><textarea name="Instructions" rows="2"></textarea>
+      <div class="tot"><span>Total</span><span>${money(total())}</span></div>
+      <button class="btn full" id="sb" type="submit">Submit Order</button>
+      <div class="err" id="er"></div>
+    </form>`);
+  $("of").onsubmit = submitOrder;
+}
+
+async function submitOrder(e){
+  e.preventDefault();
+  const f = e.target, sb = $("sb");
+  const lines = cart.map((i,n)=>`${n+1}. ${i.name} — ${i.qty} x ${money(i.price)} = ${money(i.price*i.qty)}`).join("\n");
+  const summary = `${lines}\n\nGRAND TOTAL: ${money(total())}`;
+  const data = {
+    "_subject": `New Order — ${CFG.name} — ${money(total())}`,
+    "_template": "table",
+    "_captcha": "false",
+    "Order Items": summary,
+    "Grand Total": money(total()),
+    "Customer Name": f["Customer Name"].value,
+    "Customer Phone": f["Customer Phone"].value,
+    "Delivery Address": f["Delivery Address"].value,
+    "Instructions": f["Instructions"].value || "None"
+  };
+  sb.disabled = true; sb.textContent = "Sending…"; $("er").textContent = "";
+  try{
+    const r = await fetch("https://formsubmit.co/ajax/" + CFG.email, {
+      method:"POST",
+      headers:{"Content-Type":"application/json","Accept":"application/json"},
+      body: JSON.stringify(data)
+    });
+    const j = await r.json();
+    if(!r.ok || j.success === "false") throw new Error(j.message || "Failed");
+    const msg = encodeURIComponent(`Hi ${CFG.name}, I just placed an order (${money(total())}). Name: ${data["Customer Name"]}`);
+    cart = []; save();
+    open(`<div class="ok"><h3>✅ Order placed!</h3>${CFG.name} will contact you on WhatsApp to confirm.
+      <br><a href="https://wa.me/${CFG.whatsapp}?text=${msg}" target="_blank" rel="noopener">Chat on WhatsApp</a>
+      <br><br><button class="btn" onclick="close_()">Continue Shopping</button></div>`);
+  }catch(err){
+    sb.disabled = false; sb.textContent = "Submit Order";
+    $("er").textContent = "Could not send the order. Please check your internet, or message us on WhatsApp.";
+  }
+}
+
+renderCats(); renderGrid(); updateCount();
+</script>
+</body>
+</html>
